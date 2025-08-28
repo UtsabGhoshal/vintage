@@ -1,0 +1,117 @@
+/** @import must precede all other statements */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /**
+   * Tailwind CSS theme
+   * tailwind.config.ts expects the following color variables to be expressed as HSL values.
+   * A different format will require also updating the theme in tailwind.config.ts.
+  */
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 210 18% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 210 18% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 18% 12%;
+
+    --primary: 207 89% 42%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 210 18% 12%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 210 12% 46%;
+
+    --accent: 29 100% 58%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 210 40% 90%;
+    --input: 210 40% 94%;
+    --ring: 207 89% 42%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 210 25% 95%;
+    --sidebar-foreground: 210 18% 20%;
+    --sidebar-primary: 207 89% 42%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 210 40% 92%;
+    --sidebar-accent-foreground: 210 18% 20%;
+    --sidebar-border: 210 40% 88%;
+    --sidebar-ring: 207 89% 42%;
+
+    /* Custom bus theme colors */
+    --transport-blue: 207 89% 42%;
+    --transport-orange: 29 100% 58%;
+    --transport-green: 142 71% 45%;
+    --route-card: 0 0% 100%;
+    --route-hover: 207 100% 97%;
+  }
+
+  .dark {
+    --background: 210 18% 8%;
+    --foreground: 210 20% 96%;
+
+    --card: 210 18% 12%;
+    --card-foreground: 210 20% 96%;
+
+    --popover: 210 18% 12%;
+    --popover-foreground: 210 20% 96%;
+
+    --primary: 207 89% 54%;
+    --primary-foreground: 210 18% 8%;
+
+    --secondary: 210 18% 18%;
+    --secondary-foreground: 210 20% 96%;
+
+    --muted: 210 18% 18%;
+    --muted-foreground: 210 12% 60%;
+
+    --accent: 29 100% 62%;
+    --accent-foreground: 210 18% 8%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 20% 96%;
+
+    --border: 210 18% 22%;
+    --input: 210 18% 18%;
+    --ring: 207 89% 54%;
+
+    --sidebar-background: 210 18% 10%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 207 89% 54%;
+    --sidebar-primary-foreground: 210 18% 8%;
+    --sidebar-accent: 210 18% 16%;
+    --sidebar-accent-foreground: 210 20% 90%;
+    --sidebar-border: 210 18% 20%;
+    --sidebar-ring: 207 89% 54%;
+
+    /* Custom bus theme colors for dark mode */
+    --transport-blue: 207 89% 54%;
+    --transport-orange: 29 100% 62%;
+    --transport-green: 142 71% 55%;
+    --route-card: 210 18% 12%;
+    --route-hover: 207 100% 8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
