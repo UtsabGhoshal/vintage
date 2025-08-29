@@ -62,11 +62,15 @@ export const handleLoginNeon: RequestHandler = async (req, res) => {
       token
     } as AuthResponse);
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
-    return res.status(500).json({
+    const msg = typeof error?.message === 'string' && error.message.includes('DATABASE_URL is not configured')
+      ? 'Database not configured. Please set DATABASE_URL to a valid Neon connection string.'
+      : 'Internal server error';
+    const code = msg.startsWith('Database not configured') ? 503 : 500;
+    return res.status(code).json({
       success: false,
-      message: 'Internal server error'
+      message: msg
     } as AuthResponse);
   }
 };
@@ -128,11 +132,15 @@ export const handleRegisterNeon: RequestHandler = async (req, res) => {
       token
     } as AuthResponse);
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration error:', error);
-    return res.status(500).json({
+    const msg = typeof error?.message === 'string' && error.message.includes('DATABASE_URL is not configured')
+      ? 'Database not configured. Please set DATABASE_URL to a valid Neon connection string.'
+      : 'Internal server error';
+    const code = msg.startsWith('Database not configured') ? 503 : 500;
+    return res.status(code).json({
       success: false,
-      message: 'Internal server error'
+      message: msg
     } as AuthResponse);
   }
 };
@@ -159,11 +167,15 @@ export const handleProfileNeon: RequestHandler = async (req: any, res) => {
       }
     } as AuthResponse);
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Profile error:', error);
-    return res.status(500).json({
+    const msg = typeof error?.message === 'string' && error.message.includes('DATABASE_URL is not configured')
+      ? 'Database not configured. Please set DATABASE_URL to a valid Neon connection string.'
+      : 'Internal server error';
+    const code = msg.startsWith('Database not configured') ? 503 : 500;
+    return res.status(code).json({
       success: false,
-      message: 'Internal server error'
+      message: msg
     } as AuthResponse);
   }
 };
