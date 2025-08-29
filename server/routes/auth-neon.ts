@@ -12,6 +12,9 @@ if (!JWT_SECRET) {
 
 export const handleLoginNeon: RequestHandler = async (req, res) => {
   try {
+    // Ensure users table exists
+    await databaseService.initializeUserTable();
+
     const { email, password }: LoginRequest = req.body;
 
     if (!email || !password) {
@@ -70,6 +73,9 @@ export const handleLoginNeon: RequestHandler = async (req, res) => {
 
 export const handleRegisterNeon: RequestHandler = async (req, res) => {
   try {
+    // Ensure users table exists
+    await databaseService.initializeUserTable();
+
     const { username, email, password, role }: RegisterRequest = req.body;
 
     if (!username || !email || !password || !role) {
