@@ -2,7 +2,7 @@ export interface User {
   id: string;
   username: string;
   email: string;
-  role: 'collaborator' | 'guest';
+  role: "collaborator" | "guest";
   createdAt: Date;
 }
 
@@ -15,7 +15,7 @@ export interface RegisterRequest {
   username: string;
   email: string;
   password: string;
-  role: 'collaborator' | 'guest';
+  role: "collaborator" | "guest";
 }
 
 export interface AuthResponse {

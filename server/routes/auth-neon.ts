@@ -1,13 +1,13 @@
-import { RequestHandler } from 'express';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import { databaseService } from '../services/database.service';
-import { LoginRequest, RegisterRequest, AuthResponse } from '@shared/auth';
+import { RequestHandler } from "express";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import { databaseService } from "../services/database.service";
+import { LoginRequest, RegisterRequest, AuthResponse } from "@shared/auth";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
 if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is required');
+  throw new Error("JWT_SECRET environment variable is required");
 }
 
 export const handleLoginNeon: RequestHandler = async (req, res) => {
@@ -20,7 +20,7 @@ export const handleLoginNeon: RequestHandler = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Email and password are required'
+        message: "Email and password are required",
       } as AuthResponse);
     }
 
@@ -29,7 +29,7 @@ export const handleLoginNeon: RequestHandler = async (req, res) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: "Invalid email or password",
       } as AuthResponse);
     }
 
@@ -38,39 +38,38 @@ export const handleLoginNeon: RequestHandler = async (req, res) => {
     if (!isValidPassword) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: "Invalid email or password",
       } as AuthResponse);
     }
 
     // Generate JWT token
-    const token = jwt.sign(
-      { userId: user.id, role: user.role },
-      JWT_SECRET!,
-      { expiresIn: '7d' }
-    );
+    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET!, {
+      expiresIn: "7d",
+    });
 
     return res.json({
       success: true,
-      message: 'Login successful',
+      message: "Login successful",
       user: {
         id: user.id.toString(),
         username: user.username,
         email: user.email,
         role: user.role,
-        createdAt: user.created_at
+        createdAt: user.created_at,
       },
-      token
+      token,
     } as AuthResponse);
-
   } catch (error: any) {
-    console.error('Login error:', error);
-    const msg = typeof error?.message === 'string' && error.message.includes('DATABASE_URL is not configured')
-      ? 'Database not configured. Please set DATABASE_URL to a valid Neon connection string.'
-      : 'Internal server error';
-    const code = msg.startsWith('Database not configured') ? 503 : 500;
+    console.error("Login error:", error);
+    const msg =
+      typeof error?.message === "string" &&
+      error.message.includes("DATABASE_URL is not configured")
+        ? "Database not configured. Please set DATABASE_URL to a valid Neon connection string."
+        : "Internal server error";
+    const code = msg.startsWith("Database not configured") ? 503 : 500;
     return res.status(code).json({
       success: false,
-      message: msg
+      message: msg,
     } as AuthResponse);
   }
 };
@@ -85,14 +84,14 @@ export const handleRegisterNeon: RequestHandler = async (req, res) => {
     if (!username || !email || !password || !role) {
       return res.status(400).json({
         success: false,
-        message: 'All fields are required'
+        message: "All fields are required",
       } as AuthResponse);
     }
 
-    if (!['collaborator', 'guest'].includes(role)) {
+    if (!["collaborator", "guest"].includes(role)) {
       return res.status(400).json({
         success: false,
-        message: 'Role must be either collaborator or guest'
+        message: "Role must be either collaborator or guest",
       } as AuthResponse);
     }
 
@@ -101,7 +100,7 @@ export const handleRegisterNeon: RequestHandler = async (req, res) => {
     if (userExists) {
       return res.status(409).json({
         success: false,
-        message: 'User with this email or username already exists'
+        message: "User with this email or username already exists",
       } as AuthResponse);
     }
 
@@ -110,37 +109,43 @@ export const handleRegisterNeon: RequestHandler = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create new user
-    const newUser = await databaseService.createUser(username, email, hashedPassword, role);
+    const newUser = await databaseService.createUser(
+      username,
+      email,
+      hashedPassword,
+      role,
+    );
 
     // Generate JWT token
     const token = jwt.sign(
       { userId: newUser.id, role: newUser.role },
       JWT_SECRET!,
-      { expiresIn: '7d' }
+      { expiresIn: "7d" },
     );
 
     return res.status(201).json({
       success: true,
-      message: 'Registration successful',
+      message: "Registration successful",
       user: {
         id: newUser.id.toString(),
         username: newUser.username,
         email: newUser.email,
         role: newUser.role,
-        createdAt: newUser.created_at
+        createdAt: newUser.created_at,
       },
-      token
+      token,
     } as AuthResponse);
-
   } catch (error: any) {
-    console.error('Registration error:', error);
-    const msg = typeof error?.message === 'string' && error.message.includes('DATABASE_URL is not configured')
-      ? 'Database not configured. Please set DATABASE_URL to a valid Neon connection string.'
-      : 'Internal server error';
-    const code = msg.startsWith('Database not configured') ? 503 : 500;
+    console.error("Registration error:", error);
+    const msg =
+      typeof error?.message === "string" &&
+      error.message.includes("DATABASE_URL is not configured")
+        ? "Database not configured. Please set DATABASE_URL to a valid Neon connection string."
+        : "Internal server error";
+    const code = msg.startsWith("Database not configured") ? 503 : 500;
     return res.status(code).json({
       success: false,
-      message: msg
+      message: msg,
     } as AuthResponse);
   }
 };
@@ -151,31 +156,32 @@ export const handleProfileNeon: RequestHandler = async (req: any, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: "User not found",
       } as AuthResponse);
     }
 
     return res.json({
       success: true,
-      message: 'Profile retrieved successfully',
+      message: "Profile retrieved successfully",
       user: {
         id: user.id.toString(),
         username: user.username,
         email: user.email,
         role: user.role,
-        createdAt: user.created_at
-      }
+        createdAt: user.created_at,
+      },
     } as AuthResponse);
-
   } catch (error: any) {
-    console.error('Profile error:', error);
-    const msg = typeof error?.message === 'string' && error.message.includes('DATABASE_URL is not configured')
-      ? 'Database not configured. Please set DATABASE_URL to a valid Neon connection string.'
-      : 'Internal server error';
-    const code = msg.startsWith('Database not configured') ? 503 : 500;
+    console.error("Profile error:", error);
+    const msg =
+      typeof error?.message === "string" &&
+      error.message.includes("DATABASE_URL is not configured")
+        ? "Database not configured. Please set DATABASE_URL to a valid Neon connection string."
+        : "Internal server error";
+    const code = msg.startsWith("Database not configured") ? 503 : 500;
     return res.status(code).json({
       success: false,
-      message: msg
+      message: msg,
     } as AuthResponse);
   }
 };

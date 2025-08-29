@@ -1,9 +1,9 @@
-import { RequestHandler } from 'express';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import { LoginRequest, RegisterRequest, AuthResponse } from '@shared/auth';
+import { RequestHandler } from "express";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import { LoginRequest, RegisterRequest, AuthResponse } from "@shared/auth";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key";
 
 // In-memory user storage (for demo purposes only)
 const users: Array<{
@@ -11,7 +11,7 @@ const users: Array<{
   username: string;
   email: string;
   password: string;
-  role: 'collaborator' | 'guest';
+  role: "collaborator" | "guest";
   createdAt: Date;
 }> = [];
 
@@ -22,16 +22,16 @@ export const handleLoginFallback: RequestHandler = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Email and password are required'
+        message: "Email and password are required",
       } as AuthResponse);
     }
 
     // Find user by email
-    const user = users.find(u => u.email === email);
+    const user = users.find((u) => u.email === email);
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: "Invalid email or password",
       } as AuthResponse);
     }
 
@@ -40,35 +40,32 @@ export const handleLoginFallback: RequestHandler = async (req, res) => {
     if (!isValidPassword) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: "Invalid email or password",
       } as AuthResponse);
     }
 
     // Generate JWT token
-    const token = jwt.sign(
-      { userId: user.id, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     return res.json({
       success: true,
-      message: 'Login successful',
+      message: "Login successful",
       user: {
         id: user.id,
         username: user.username,
         email: user.email,
         role: user.role,
-        createdAt: user.createdAt
+        createdAt: user.createdAt,
       },
-      token
+      token,
     } as AuthResponse);
-
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
     return res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: "Internal server error",
     } as AuthResponse);
   }
 };
@@ -80,23 +77,25 @@ export const handleRegisterFallback: RequestHandler = async (req, res) => {
     if (!username || !email || !password || !role) {
       return res.status(400).json({
         success: false,
-        message: 'All fields are required'
+        message: "All fields are required",
       } as AuthResponse);
     }
 
-    if (!['collaborator', 'guest'].includes(role)) {
+    if (!["collaborator", "guest"].includes(role)) {
       return res.status(400).json({
         success: false,
-        message: 'Role must be either collaborator or guest'
+        message: "Role must be either collaborator or guest",
       } as AuthResponse);
     }
 
     // Check if user already exists
-    const existingUser = users.find(u => u.email === email || u.username === username);
+    const existingUser = users.find(
+      (u) => u.email === email || u.username === username,
+    );
     if (existingUser) {
       return res.status(409).json({
         success: false,
-        message: 'User with this email or username already exists'
+        message: "User with this email or username already exists",
       } as AuthResponse);
     }
 
@@ -111,7 +110,7 @@ export const handleRegisterFallback: RequestHandler = async (req, res) => {
       email,
       password: hashedPassword,
       role,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     users.push(newUser);
@@ -120,58 +119,56 @@ export const handleRegisterFallback: RequestHandler = async (req, res) => {
     const token = jwt.sign(
       { userId: newUser.id, role: newUser.role },
       JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: "7d" },
     );
 
     return res.status(201).json({
       success: true,
-      message: 'Registration successful',
+      message: "Registration successful",
       user: {
         id: newUser.id,
         username: newUser.username,
         email: newUser.email,
         role: newUser.role,
-        createdAt: newUser.createdAt
+        createdAt: newUser.createdAt,
       },
-      token
+      token,
     } as AuthResponse);
-
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error("Registration error:", error);
     return res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: "Internal server error",
     } as AuthResponse);
   }
 };
 
 export const handleProfileFallback: RequestHandler = async (req: any, res) => {
   try {
-    const user = users.find(u => u.id === req.user.userId);
+    const user = users.find((u) => u.id === req.user.userId);
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: "User not found",
       } as AuthResponse);
     }
 
     return res.json({
       success: true,
-      message: 'Profile retrieved successfully',
+      message: "Profile retrieved successfully",
       user: {
         id: user.id,
         username: user.username,
         email: user.email,
         role: user.role,
-        createdAt: user.createdAt
-      }
+        createdAt: user.createdAt,
+      },
     } as AuthResponse);
-
   } catch (error) {
-    console.error('Profile error:', error);
+    console.error("Profile error:", error);
     return res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: "Internal server error",
     } as AuthResponse);
   }
 };

@@ -1,25 +1,25 @@
-import { RequestHandler } from 'express';
-import jwt from 'jsonwebtoken';
-import User from '../models/User';
-import connectDB from '../lib/database';
-import { LoginRequest, RegisterRequest, AuthResponse } from '@shared/auth';
+import { RequestHandler } from "express";
+import jwt from "jsonwebtoken";
+import User from "../models/User";
+import connectDB from "../lib/database";
+import { LoginRequest, RegisterRequest, AuthResponse } from "@shared/auth";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
 if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is required');
+  throw new Error("JWT_SECRET environment variable is required");
 }
 
 export const handleLogin: RequestHandler = async (req, res) => {
   try {
     await connectDB();
-    
+
     const { email, password }: LoginRequest = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Email and password are required'
+        message: "Email and password are required",
       } as AuthResponse);
     }
 
@@ -28,7 +28,7 @@ export const handleLogin: RequestHandler = async (req, res) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: "Invalid email or password",
       } as AuthResponse);
     }
 
@@ -37,35 +37,32 @@ export const handleLogin: RequestHandler = async (req, res) => {
     if (!isValidPassword) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: "Invalid email or password",
       } as AuthResponse);
     }
 
     // Generate JWT token
-    const token = jwt.sign(
-      { userId: user._id, role: user.role },
-      JWT_SECRET!,
-      { expiresIn: '7d' }
-    );
+    const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET!, {
+      expiresIn: "7d",
+    });
 
     return res.json({
       success: true,
-      message: 'Login successful',
+      message: "Login successful",
       user: {
         id: user._id,
         username: user.username,
         email: user.email,
         role: user.role,
-        createdAt: user.createdAt
+        createdAt: user.createdAt,
       },
-      token
+      token,
     } as AuthResponse);
-
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
     return res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: "Internal server error",
     } as AuthResponse);
   }
 };
@@ -73,32 +70,32 @@ export const handleLogin: RequestHandler = async (req, res) => {
 export const handleRegister: RequestHandler = async (req, res) => {
   try {
     await connectDB();
-    
+
     const { username, email, password, role }: RegisterRequest = req.body;
 
     if (!username || !email || !password || !role) {
       return res.status(400).json({
         success: false,
-        message: 'All fields are required'
+        message: "All fields are required",
       } as AuthResponse);
     }
 
-    if (!['collaborator', 'guest'].includes(role)) {
+    if (!["collaborator", "guest"].includes(role)) {
       return res.status(400).json({
         success: false,
-        message: 'Role must be either collaborator or guest'
+        message: "Role must be either collaborator or guest",
       } as AuthResponse);
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ 
-      $or: [{ email }, { username }] 
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }],
     });
 
     if (existingUser) {
       return res.status(409).json({
         success: false,
-        message: 'User with this email or username already exists'
+        message: "User with this email or username already exists",
       } as AuthResponse);
     }
 
@@ -107,7 +104,7 @@ export const handleRegister: RequestHandler = async (req, res) => {
       username,
       email,
       password,
-      role
+      role,
     });
 
     await newUser.save();
@@ -116,27 +113,26 @@ export const handleRegister: RequestHandler = async (req, res) => {
     const token = jwt.sign(
       { userId: newUser._id, role: newUser.role },
       JWT_SECRET!,
-      { expiresIn: '7d' }
+      { expiresIn: "7d" },
     );
 
     return res.status(201).json({
       success: true,
-      message: 'Registration successful',
+      message: "Registration successful",
       user: {
         id: newUser._id,
         username: newUser.username,
         email: newUser.email,
         role: newUser.role,
-        createdAt: newUser.createdAt
+        createdAt: newUser.createdAt,
       },
-      token
+      token,
     } as AuthResponse);
-
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error("Registration error:", error);
     return res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: "Internal server error",
     } as AuthResponse);
   }
 };
@@ -144,32 +140,31 @@ export const handleRegister: RequestHandler = async (req, res) => {
 export const handleProfile: RequestHandler = async (req: any, res) => {
   try {
     await connectDB();
-    
-    const user = await User.findById(req.user.userId).select('-password');
+
+    const user = await User.findById(req.user.userId).select("-password");
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: "User not found",
       } as AuthResponse);
     }
 
     return res.json({
       success: true,
-      message: 'Profile retrieved successfully',
+      message: "Profile retrieved successfully",
       user: {
         id: user._id,
         username: user.username,
         email: user.email,
         role: user.role,
-        createdAt: user.createdAt
-      }
+        createdAt: user.createdAt,
+      },
     } as AuthResponse);
-
   } catch (error) {
-    console.error('Profile error:', error);
+    console.error("Profile error:", error);
     return res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: "Internal server error",
     } as AuthResponse);
   }
 };

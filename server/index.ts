@@ -2,8 +2,16 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
-import { handleLoginNeon, handleRegisterNeon, handleProfileNeon } from "./routes/auth-neon";
-import { handleGetUsers, handleUpdateUserRole, handleDeleteUser } from "./routes/admin";
+import {
+  handleLoginNeon,
+  handleRegisterNeon,
+  handleProfileNeon,
+} from "./routes/auth-neon";
+import {
+  handleGetUsers,
+  handleUpdateUserRole,
+  handleDeleteUser,
+} from "./routes/admin";
 import { authenticateToken, requireRole } from "./middleware/auth";
 import { databaseService } from "./services/database.service";
 
@@ -23,13 +31,13 @@ export function createServer() {
       res.json({
         success: true,
         message: "Database connection healthy",
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     } catch (error) {
       res.status(500).json({
         success: false,
         message: "Database connection failed",
-        error: error.message
+        error: error.message,
       });
     }
   });
@@ -40,9 +48,24 @@ export function createServer() {
   app.get("/api/auth/profile", authenticateToken, handleProfileNeon);
 
   // Admin routes (collaborators only)
-  app.get("/api/admin/users", authenticateToken, requireRole('collaborator'), handleGetUsers);
-  app.put("/api/admin/users/:userId/role", authenticateToken, requireRole('collaborator'), handleUpdateUserRole);
-  app.delete("/api/admin/users/:userId", authenticateToken, requireRole('collaborator'), handleDeleteUser);
+  app.get(
+    "/api/admin/users",
+    authenticateToken,
+    requireRole("collaborator"),
+    handleGetUsers,
+  );
+  app.put(
+    "/api/admin/users/:userId/role",
+    authenticateToken,
+    requireRole("collaborator"),
+    handleUpdateUserRole,
+  );
+  app.delete(
+    "/api/admin/users/:userId",
+    authenticateToken,
+    requireRole("collaborator"),
+    handleDeleteUser,
+  );
 
   // Example API routes
   app.get("/api/ping", (_req, res) => {
