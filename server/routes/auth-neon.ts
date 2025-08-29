@@ -161,12 +161,3 @@ export const handleProfileNeon: RequestHandler = async (req: any, res) => {
     } as AuthResponse);
   }
 };
-
-// Initialize database on first import
-(async () => {
-  try {
-    await databaseService.initializeUserTable();
-  } catch (error) {
-    console.error('Failed to initialize database:', error);
-  }
-})();
