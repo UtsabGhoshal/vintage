@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
-import { handleLogin, handleRegister, handleProfile } from "./routes/auth";
+import { handleLoginFallback, handleRegisterFallback, handleProfileFallback } from "./routes/auth-fallback";
 import { authenticateToken } from "./middleware/auth";
 
 export function createServer() {
@@ -13,10 +13,10 @@ export function createServer() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  // Authentication routes
-  app.post("/api/auth/login", handleLogin);
-  app.post("/api/auth/register", handleRegister);
-  app.get("/api/auth/profile", authenticateToken, handleProfile);
+  // Authentication routes (using fallback for now due to MongoDB Atlas IP restrictions)
+  app.post("/api/auth/login", handleLoginFallback);
+  app.post("/api/auth/register", handleRegisterFallback);
+  app.get("/api/auth/profile", authenticateToken, handleProfileFallback);
 
   // Example API routes
   app.get("/api/ping", (_req, res) => {
