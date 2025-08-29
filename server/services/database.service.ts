@@ -1,20 +1,23 @@
 import { neon } from '@neondatabase/serverless';
 
 export class DatabaseService {
-    private readonly sql;
+    private sql: ReturnType<typeof neon> | null = null;
 
-    constructor() {
+    private ensureSql() {
+        if (this.sql) return;
         const databaseUrl = process.env.DATABASE_URL;
-        if (!databaseUrl) {
-            throw new Error('DATABASE_URL environment variable is required');
+        // Do not initialize with placeholder or missing URL to avoid crashing dev server
+        if (!databaseUrl || /user:password@hostname:port\/database/.test(databaseUrl)) {
+            throw new Error('DATABASE_URL is not configured. Please set a valid Neon connection string.');
         }
         this.sql = neon(databaseUrl);
     }
 
     // Initialize user table
     async initializeUserTable() {
+        this.ensureSql();
         try {
-            await this.sql`
+            await this.sql!`
                 CREATE TABLE IF NOT EXISTS users (
                     id SERIAL PRIMARY KEY,
                     username VARCHAR(50) UNIQUE NOT NULL,
@@ -24,6 +27,9 @@ export class DatabaseService {
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             `;
+            // Optional: index for faster lookups
+            await this.sql!`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`;
+            await this.sql!`CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)`;
             console.log('User table initialized successfully');
         } catch (error) {
             console.error('Error initializing user table:', error);
@@ -33,14 +39,15 @@ export class DatabaseService {
 
     // Create a new user
     async createUser(username: string, email: string, hashedPassword: string, role: 'collaborator' | 'guest') {
+        this.ensureSql();
         try {
-            const result = await this.sql`
+            const result = await this.sql!`
                 INSERT INTO users (username, email, password, role)
                 VALUES (${username}, ${email}, ${hashedPassword}, ${role})
                 RETURNING id, username, email, role, created_at
             `;
             return result[0];
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error creating user:', error);
             throw error;
         }
@@ -48,8 +55,9 @@ export class DatabaseService {
 
     // Find user by email
     async findUserByEmail(email: string) {
+        this.ensureSql();
         try {
-            const result = await this.sql`
+            const result = await this.sql!`
                 SELECT id, username, email, password, role, created_at
                 FROM users
                 WHERE email = ${email}
@@ -64,8 +72,9 @@ export class DatabaseService {
 
     // Find user by ID
     async findUserById(id: string) {
+        this.ensureSql();
         try {
-            const result = await this.sql`
+            const result = await this.sql!`
                 SELECT id, username, email, role, created_at
                 FROM users
                 WHERE id = ${id}
@@ -80,8 +89,9 @@ export class DatabaseService {
 
     // Check if user exists by email or username
     async userExists(email: string, username: string) {
+        this.ensureSql();
         try {
-            const result = await this.sql`
+            const result = await this.sql!`
                 SELECT id FROM users
                 WHERE email = ${email} OR username = ${username}
                 LIMIT 1
@@ -95,8 +105,9 @@ export class DatabaseService {
 
     // Get all users (for admin purposes)
     async getAllUsers() {
+        this.ensureSql();
         try {
-            const result = await this.sql`
+            const result = await this.sql!`
                 SELECT id, username, email, role, created_at
                 FROM users
                 ORDER BY created_at DESC
@@ -110,8 +121,9 @@ export class DatabaseService {
 
     // Update user role
     async updateUserRole(id: string, role: 'collaborator' | 'guest') {
+        this.ensureSql();
         try {
-            const result = await this.sql`
+            const result = await this.sql!`
                 UPDATE users
                 SET role = ${role}
                 WHERE id = ${id}
@@ -126,8 +138,9 @@ export class DatabaseService {
 
     // Delete user
     async deleteUser(id: string) {
+        this.ensureSql();
         try {
-            const result = await this.sql`
+            const result = await this.sql!`
                 DELETE FROM users
                 WHERE id = ${id}
                 RETURNING id
@@ -141,9 +154,10 @@ export class DatabaseService {
 
     // Generic query method for custom operations
     async query(queryText: string, params: any[] = []) {
+        this.ensureSql();
         try {
-            // Note: Neon uses template literals, so this is a simplified wrapper
-            const result = await this.sql(queryText, params);
+            // Neon uses tagged template literals; this helper allows raw text when needed
+            const result = await (this.sql as any)(queryText, params);
             return result;
         } catch (error) {
             console.error('Error executing query:', error);
@@ -152,5 +166,5 @@ export class DatabaseService {
     }
 }
 
-// Create singleton instance
+// Singleton instance (lazy neon init)
 export const databaseService = new DatabaseService();
